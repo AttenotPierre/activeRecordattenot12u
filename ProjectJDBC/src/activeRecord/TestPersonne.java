@@ -3,6 +3,7 @@ package activeRecord;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -14,21 +15,26 @@ public class TestPersonne {
     public void setup() {
         // On s'assure qu'on utilise la bonne base
         DBConnection.setNomDB("testpersonne");
+        // Ici on suppose que la base est déjà peuplée par le script SQL
+        // (Spielberg, Scott, Kubrick, Fincher, etc.)
     }
 
     // 7.1 : test de findAll
     @Test
-    public void testFindAll() throws SQLException {
-        List<Personne> personnes = Personne.findAll();
+    public void testFindAll() throws SQLException, ClassNotFoundException {
+        ArrayList<Personne> personnes = Personne.findAll();
 
         // Avec le SQL fourni, on sait qu'il y a au moins 4 personnes
-        assertTrue(personnes.size() >= 4, "Il doit y avoir au moins 4 personnes dans la base");
+        assertTrue(personnes.size() >= 4,
+                "Il doit y avoir au moins 4 personnes dans la base");
 
         // On vérifie par exemple qu'il y a bien Spielberg / Steven
         boolean foundSpielberg = personnes.stream()
-                .anyMatch(p -> p.getNom().equals("Spielberg") && p.getPrenom().equals("Steven"));
+                .anyMatch(p -> p.getNom().equals("Spielberg")
+                        && p.getPrenom().equals("Steven"));
 
-        assertTrue(foundSpielberg, "Spielberg Steven doit être présent dans la base");
+        assertTrue(foundSpielberg,
+                "Spielberg Steven doit être présent dans la base");
     }
 
     // 7.2 : test de findById
@@ -52,15 +58,17 @@ public class TestPersonne {
         // D'après le SQL, nom = 'Scott', prenom = 'Ridley' pour id = 2
         List<Personne> scotts = Personne.findByName("Scott");
 
-        assertFalse(scotts.isEmpty(), "findByName('Scott') ne doit pas renvoyer une liste vide");
+        assertFalse(scotts.isEmpty(),
+                "findByName('Scott') ne doit pas renvoyer une liste vide");
 
         // Tous les résultats doivent avoir nom = "Scott"
         for (Personne p : scotts) {
             assertEquals("Scott", p.getNom());
         }
 
-        // Si tu veux tester un nom inexistant :
+        // Tester un nom inexistant
         List<Personne> inconnus = Personne.findByName("NomQuiNexistePas");
-        assertTrue(inconnus.isEmpty(), "findByName sur un nom inexistant doit renvoyer une liste vide");
+        assertTrue(inconnus.isEmpty(),
+                "findByName sur un nom inexistant doit renvoyer une liste vide");
     }
 }

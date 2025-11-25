@@ -15,7 +15,6 @@ public class Personne {
     private String prenom;
 
     // --- Constructeur public pour créer une Personne "nouvelle" ---
-    // (pas encore en base)
     public Personne(String nom, String prenom) {
         this.id = -1;
         this.nom = nom;
@@ -35,8 +34,7 @@ public class Personne {
         return id;
     }
 
-    // sera utile plus tard pour save(), mais on peut le laisser public
-    public void setId(int id) {
+    public void setId(int id) {  // tu peux le laisser public
         this.id = id;
     }
 
@@ -64,21 +62,19 @@ public class Personne {
     // ===============================================================
     // 7.1 findAll : retourne tous les tuples de la table Personne
     // ===============================================================
-    public static List<Personne> findAll() throws SQLException {
-        List<Personne> res = new ArrayList<>();
+    public static ArrayList<Personne> findAll() throws SQLException, ClassNotFoundException {
+        ArrayList<Personne> res = new ArrayList<>();
 
         Connection connect = DBConnection.getConnection();
         String sql = "SELECT * FROM Personne ORDER BY id";
+        PreparedStatement ps = connect.prepareStatement(sql);
+        ResultSet rs = ps.executeQuery();
 
-        try (PreparedStatement ps = connect.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                int id = rs.getInt("id");
-                String nom = rs.getString("nom");
-                String prenom = rs.getString("prenom");
-                res.add(new Personne(id, nom, prenom));
-            }
+        while (rs.next()) {
+            int id = rs.getInt("id");
+            String nom = rs.getString("nom");
+            String prenom = rs.getString("prenom");
+            res.add(new Personne(id, nom, prenom));
         }
 
         return res;
@@ -91,20 +87,18 @@ public class Personne {
     public static Personne findById(int idRecherche) throws SQLException {
         Connection connect = DBConnection.getConnection();
         String sql = "SELECT * FROM Personne WHERE id = ?";
+        PreparedStatement ps = connect.prepareStatement(sql);
+        ps.setInt(1, idRecherche);
+        ResultSet rs = ps.executeQuery();
 
-        try (PreparedStatement ps = connect.prepareStatement(sql)) {
-            ps.setInt(1, idRecherche);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    int id = rs.getInt("id");
-                    String nom = rs.getString("nom");
-                    String prenom = rs.getString("prenom");
-                    return new Personne(id, nom, prenom);
-                } else {
-                    return null;
-                }
-            }
+        if (rs.next()) {
+            return new Personne(
+                    rs.getInt("id"),
+                    rs.getString("nom"),
+                    rs.getString("prenom")
+            );
+        } else {
+            return null;
         }
     }
 
@@ -113,22 +107,20 @@ public class Personne {
     //      correspond au paramètre
     // ===============================================================
     public static List<Personne> findByName(String nomRecherche) throws SQLException {
-        List<Personne> res = new ArrayList<>();
+        ArrayList<Personne> res = new ArrayList<>();
 
         Connection connect = DBConnection.getConnection();
         String sql = "SELECT * FROM Personne WHERE nom = ? ORDER BY id";
+        PreparedStatement ps = connect.prepareStatement(sql);
+        ps.setString(1, nomRecherche);
+        ResultSet rs = ps.executeQuery();
 
-        try (PreparedStatement ps = connect.prepareStatement(sql)) {
-            ps.setString(1, nomRecherche);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    int id = rs.getInt("id");
-                    String nom = rs.getString("nom");
-                    String prenom = rs.getString("prenom");
-                    res.add(new Personne(id, nom, prenom));
-                }
-            }
+        while (rs.next()) {
+            res.add(new Personne(
+                    rs.getInt("id"),
+                    rs.getString("nom"),
+                    rs.getString("prenom")
+            ));
         }
 
         return res;
