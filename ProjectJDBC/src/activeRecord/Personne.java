@@ -162,10 +162,27 @@ public class Personne {
     }
     public void saveNew() throws SQLException {
         Connection c = DBConnection.getConnection();
+        String sql = "INSERT INTO Personne (nom, prenom) VALUES (?, ?)";
+        PreparedStatement ps = c.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+        ps.setString(1, this.nom);
+        ps.setString(2, this.prenom);
+        ps.executeUpdate();
+
+        // Récupérer l'ID auto-généré
+        ResultSet rs = ps.getGeneratedKeys();
+        if (rs.next()) {
+            this.id = rs.getInt(1);
+        }
     }
+
     public void update() throws SQLException {
         Connection c = DBConnection.getConnection();
-
+        String sql = "UPDATE Personne SET nom = ?, prenom = ? WHERE id = ?";
+        PreparedStatement ps = c.prepareStatement(sql);
+        ps.setString(1, this.nom);
+        ps.setString(2, this.prenom);
+        ps.setInt(3, this.id);
+        ps.executeUpdate();
     }
 
 }
